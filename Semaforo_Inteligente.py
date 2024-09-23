@@ -1,9 +1,8 @@
 // Definindo os pinos
 const int pinLuzVerde = 8;    // Pino para o LED verde
-const int pinLuzAmarela = 9; // Pino para o LED amarelo
+const int pinLuzAmarela = 9;  // Pino para o LED amarelo
 const int pinLuzVermelha = 10; // Pino para o LED vermelho
 const int pinBuzzer = 7;      // Pino para o buzzer
-
 
 #define emissorTrig 6
 #define recepEcho 5
@@ -11,11 +10,10 @@ const int pinBuzzer = 7;      // Pino para o buzzer
 long duracao;
 int distancia;
 
-// Definindo os tempos para cada fase
-const int tempoVerde = 3000;   // Tempo da luz verde em milissegundos
-const int tempoAmarelo = 1000; // Tempo da luz amarela em milissegundos
-const int tempoVermelho = 3000; // Tempo da luz vermelha em milissegundos
-const int tempoBuzzer = 100;   // Tempo do buzzer em milissegundos
+// Definindo os tempos
+const int tempoAmarelo = 2000; // Tempo da luz amarela em milissegundos
+const int tempoBuzzer = 100;    // Tempo do buzzer em milissegundos
+const int tempoVermelho = 5000; // Tempo do LED vermelho em milissegundos
 
 void setup() {
   // Configurando os pinos como saída
@@ -27,7 +25,7 @@ void setup() {
   pinMode(recepEcho, INPUT);
   
   // Inicialmente, todos os LEDs e o buzzer estão desligados
-  digitalWrite(pinLuzVerde, LOW);
+  digitalWrite(pinLuzVerde, HIGH); // O LED verde começa aceso
   digitalWrite(pinLuzAmarela, LOW);
   digitalWrite(pinLuzVermelha, LOW);
   digitalWrite(pinBuzzer, LOW);
@@ -35,39 +33,38 @@ void setup() {
   Serial.begin(9600);
 }
 
-
 void loop() {
+  // Faz a leitura da distância
   dist();
-  // Verifica se há movimento detectado pelo sensor
-  if (digitalRead(distancia) == HIGH) {
-    // Luz verde acende
-    digitalWrite(pinLuzVerde, HIGH);
-    
-    // Aciona o buzzer em sequência
-    for (int i = 0; i < 3; i++) {
-      digitalWrite(pinBuzzer, HIGH);
-      delay(tempoBuzzer);
-      digitalWrite(pinBuzzer, LOW);
-      delay(tempoBuzzer);
-    }
-    
-    // Espera com a luz verde acesa e o buzzer em sequência
-    delay(tempoVerde);
-    
-    // Desliga a luz verde
+
+  // Se houver algo detectado, acende o LED amarelo e depois o vermelho
+  if (distancia < 30) {
+    // Desliga o LED verde
     digitalWrite(pinLuzVerde, LOW);
+
+    // Acende o LED amarelo por 1 segundo
+    digitalWrite(pinLuzAmarela, HIGH);
+    delay(tempoAmarelo);
+    digitalWrite(pinLuzAmarela, LOW);
+    
+    // Acende o LED vermelho
+    digitalWrite(pinLuzVermelha, HIGH);
+    
+    // Aciona o buzzer enquanto o LED vermelho estiver aceso
+    digitalWrite(pinBuzzer, HIGH);
+    
+    // Aguarda 5 segundos com o LED vermelho e buzzer acesos
+    delay(tempoVermelho);
+    
+    // Desliga o LED vermelho e o buzzer
+    digitalWrite(pinLuzVermelha, LOW);
+    digitalWrite(pinBuzzer, LOW);
+
+    // Acende novamente o LED verde
+    digitalWrite(pinLuzVerde, HIGH);
   }
-
-  // Fase Amarela
-  digitalWrite(pinLuzAmarela, HIGH);
-  delay(tempoAmarelo);
-  digitalWrite(pinLuzAmarela, LOW);
-
-  // Fase Vermelha
-  digitalWrite(pinLuzVermelha, HIGH);
-  delay(tempoVermelho);
-  digitalWrite(pinLuzVermelha, LOW);
 }
+
 void dist() {
   digitalWrite(emissorTrig, LOW);
   delayMicroseconds(2);
